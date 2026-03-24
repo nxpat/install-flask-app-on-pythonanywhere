@@ -1,4 +1,4 @@
-# 🚀 Guide Complet de Déploiement : Flask (Factory Pattern) + SQLite sur PythonAnywhere
+# 🚀 Guide complet de déploiement : Flask (Factory Pattern) + SQLite sur PythonAnywhere
 
 Félicitations pour avoir finalisé votre application ! Ce guide vous montre comment prendre votre projet sur votre PC Windows, le sauvegarder sur GitHub en utilisant VS Code, et le déployer en ligne sur PythonAnywhere.
 
@@ -147,11 +147,70 @@ Sur un serveur, SQLite a besoin d'un **chemin absolu** pour ne pas se perdre.
 
 ---
 
+## Phase 8 : Gérer les fichiers statiques (CSS, Images, JavaScript)
+
+Si votre site s'affiche sans couleurs, sans mise en page (CSS manquant) ou avec des images brisées, c'est normal ! En production, il est fortement recommandé de laisser le serveur web distribuer ces fichiers directement, sans passer par Flask.
+
+PythonAnywhere possède un outil dédié pour cela.
+
+1. **Aller dans l'onglet Web :** Sur votre tableau de bord PythonAnywhere, allez dans la section **Web** de votre application.
+2. **Trouver la section "Static files" :** Descendez au milieu de la page jusqu'à voir la rubrique **Static files** (Fichiers statiques).
+3. **Configurer l'URL (le lien web) :**
+   * Cliquez sur le texte bleu **Enter URL**.
+   * Tapez exactement : `/static/`
+   * Appuyez sur la coche bleue pour valider.
+4. **Configurer le chemin (Directory) :**
+   * Cliquez sur le texte bleu **Enter path** situé juste à côté.
+   * Entrez le **chemin absolu** vers le dossier `static` de votre projet. Il doit ressembler à ceci (adaptez les noms !) :
+     `/home/votre_pseudo/nom-du-depot/nom_de_votre_dossier_app/static`
+   * Appuyez sur la coche bleue pour valider.
+5. **Recharger le site :** Remontez tout en haut de la page et cliquez sur le gros bouton vert **Reload**.
+
+*💡 **Astuce de pro :** Si après avoir rechargé la page, votre design n'apparaît toujours pas ou ne semble pas à jour, c'est souvent la faute de votre navigateur internet qui a gardé l'ancien design en mémoire (le cache). Sur votre site, faites un rechargement forcé en appuyant sur `Ctrl + F5` (Windows) ou `Cmd + Maj + R` (Mac).*
+
+---
+
 ## 🚀 Étape Finale : Lancement !
 
 Retournez sur l'onglet **Web** de PythonAnywhere et cliquez sur le gros bouton vert **Reload**. 
 Visitez votre adresse web (ex: `votre_pseudo.pythonanywhere.com`) : votre application est en ligne ! 🎉
 
+Voici une section de dépannage (troubleshooting) parfaite pour compléter le guide. Elle regroupe les problèmes les plus fréquents que les étudiants rencontrent lors de leur premier déploiement.
+
+Vous pouvez ajouter cette partie à la toute fin du document précédent.
+
 ***
 
-Voilà le document prêt à l'emploi. Pensez-vous qu'il serait utile que je rédige également un petit "guide de dépannage" (troubleshooting) avec les erreurs les plus courantes (comme l'erreur 500 ou la base de données introuvable) au cas où ils rencontreraient des problèmes après le déploiement ?
+## 🚑 Annexe : Guide de Dépannage (Troubleshooting)
+
+Il est très fréquent que tout ne fonctionne pas du premier coup en production. Pas de panique ! Voici comment résoudre les problèmes les plus courants.
+
+### 1. J'ai une page "500 Internal Server Error"
+C'est l'erreur la plus classique. Elle signifie simplement que votre code Python a planté, mais pour des raisons de sécurité, le serveur ne montre pas l'erreur aux visiteurs.
+* **La solution :** Allez dans l'onglet **Web** de PythonAnywhere. Descendez jusqu'à la section **Log files** et cliquez sur le lien de l'**Error log**. 
+* Allez tout à la fin de ce fichier texte (les erreurs les plus récentes sont en bas) pour lire le "Traceback" Python. Il vous dira exactement à quelle ligne et dans quel fichier l'erreur s'est produite.
+
+### 2. L'erreur dans les logs est `ModuleNotFoundError: No module named 'X'`
+Le serveur ne trouve pas l'une de vos bibliothèques (par exemple, `flask_sqlalchemy` ou `dotenv`).
+* **La cause :** Soit vous avez oublié de l'ajouter dans votre `requirements.txt`, soit votre environnement virtuel n'est pas bien configuré dans l'onglet Web.
+* **La solution :** Ouvrez une console Bash, activez votre environnement (`workon mon_env`), et installez le module manquant manuellement : `pip install nom_du_module`. N'oubliez pas de cliquer sur le bouton **Reload** dans l'onglet Web ensuite.
+
+### 3. J'ai une erreur de Base de Données (ex: `OperationalError: no such table`)
+L'application fonctionne, mais dès que vous essayez de vous connecter ou d'afficher des données, ça plante.
+* **La cause :** La base de données SQLite n'a pas été créée au bon endroit, ou les tables n'ont pas été générées.
+* **La solution :** 1. Vérifiez bien la Phase 7 du guide. Avez-vous utilisé un chemin absolu (`basedir`) ?
+    2. Avez-vous bien fait le `app.app_context().push()` avant le `db.create_all()` dans la console ? Refaites la Phase 7 avec soin.
+
+### 4. J'ai modifié mon code sur mon PC, mais le site ne change pas !
+C'est normal, PythonAnywhere ne se met pas à jour tout seul par magie quand vous modifiez votre code local.
+* **Le processus de mise à jour (Workflow) :**
+    1. Sur votre PC (VS Code) : Faites vos modifications, faites un **Commit**, puis un **Push** vers GitHub.
+    2. Sur PythonAnywhere : Ouvrez votre console Bash, allez dans votre dossier (`cd nom-du-depot`) et tapez **`git pull`** pour télécharger la nouvelle version.
+    3. Sur PythonAnywhere (Onglet Web) : Cliquez impérativement sur le gros bouton vert **Reload**.
+
+### 5. Je vois mon code source au lieu de mon site
+Si en allant sur votre adresse, vous voyez des dossiers ou le texte de votre code Python...
+* **La cause :** Vous n'avez pas choisi "Manual Configuration" lors de la création de la Web App, ou votre fichier WSGI (Phase 6) est mal configuré et ne lance pas l'objet `application`.
+
+***
+
